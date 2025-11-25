@@ -1,0 +1,8 @@
+pymysql
+PyQt5
+matplotlib
+reportlab
+cryptography
+pandas
+openpyxl
+pyinstaller
