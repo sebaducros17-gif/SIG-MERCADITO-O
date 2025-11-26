@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     rol VARCHAR(20)
 );
 
--- Insertamos usuarios de prueba
+
 INSERT IGNORE INTO usuarios (usuario, password, rol) VALUES ('admin', 'admin', 'Administrador');
 INSERT IGNORE INTO usuarios (usuario, password, rol) VALUES ('cajero1', '1234', 'Cajero');
 INSERT IGNORE INTO usuarios (usuario, password, rol) VALUES ('cajero2', '5678', 'Cajero');
@@ -32,8 +32,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
     rol VARCHAR(20)
 );
 
--- 2. INSERTAR USUARIO ADMIN (¡Sin esto no puedes entrar!)
--- Usamos INSERT IGNORE para que no de error si ya existe
+-- 2. INSERTAR USUARIO ADMIN 
+
 INSERT IGNORE INTO usuarios (usuario, password, rol) VALUES ('admin', 'admin', 'Administrador');
 INSERT IGNORE INTO usuarios (usuario, password, rol) VALUES ('cajero1', '1234', 'Cajero');
 
