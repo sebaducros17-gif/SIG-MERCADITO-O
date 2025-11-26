@@ -28,9 +28,9 @@ DB_CONFIG = {
     'database': 'mercadito_o'
 }
 
-# =======================================================
-# UTILIDAD: TICKET PDF
-# =======================================================
+
+
+
 def generar_ticket_pdf(id_venta, items, total, usuario, metodo):
     nombre = f"ticket_{id_venta}.pdf"
     try:
@@ -65,15 +65,14 @@ def generar_ticket_pdf(id_venta, items, total, usuario, metodo):
         os.startfile(nombre)
     except: pass
 
-# =======================================================
-# LOGIN (CORREGIDO)
-# =======================================================
+# LOGIN 
+
 class LoginDialog(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Acceso")
         self.setFixedSize(300, 180)
-        self.usuario_logueado = None # <--- ESTO FALTABA ANTES
+        self.usuario_logueado = None 
         
         l = QVBoxLayout(self)
         self.u = QLineEdit(); self.u.setPlaceholderText("Usuario")
@@ -97,7 +96,7 @@ class LoginDialog(QDialog):
             conn.close()
             
             if r: 
-                self.usuario_logueado = r[0] # <--- ASIGNACION CORRECTA
+                self.usuario_logueado = r[0] 
                 self.accept()
             else: 
                 QMessageBox.warning(self, "Error", "Datos incorrectos")
@@ -139,9 +138,9 @@ class SelectorProductoDialog(QDialog):
             self.sel = self.prods[r]
             self.accept()
 
-# =======================================================
+
 # PESTAÑA 1: VENTAS (CORREGIDA DEFINITIVA)
-# =======================================================
+
 class TabVenta(QWidget):
     def __init__(self): 
         super().__init__()
@@ -171,7 +170,7 @@ class TabVenta(QWidget):
         izq.addWidget(self.tbl)
         
         der = QVBoxLayout()
-        # AQUÍ DEFINIMOS EL NOMBRE CORRECTO: self.lbl_tot
+        
         self.lbl_tot = QLabel("$0") 
         self.lbl_tot.setAlignment(Qt.AlignCenter)
         self.lbl_tot.setStyleSheet("font-size:45px;color:#2E7D32;font-weight:bold")
@@ -272,7 +271,7 @@ class TabVenta(QWidget):
             self.tbl.setCellWidget(i, 5, b)
             
             tot += it['sub']
-        # CORRECCIÓN: Usamos self.lbl_tot consistentemente
+        
         self.lbl_tot.setText(f"${tot:,.0f}".replace(",", "."))
 
     def dele(self, i): self.carrito.pop(i); self.render()
@@ -289,10 +288,10 @@ class TabVenta(QWidget):
             c = conn.cursor()
             idv = datetime.now().strftime("%Y%m%d-%H%M%S")
             
-            # CORRECCIÓN: Usamos self.lbl_tot
+            
             tot = float(self.lbl_tot.text().replace("$","").replace(".",""))
             
-            # CORRECCIÓN SQL: Usamos nombres explícitos 'usuario' y 'venta_id'
+           
             c.execute("INSERT INTO ventas (id, fecha, total, metodo_pago, usuario) VALUES (%s, NOW(), %s, %s, %s)", 
                       (idv, tot, met, self.usuario))
             
@@ -311,9 +310,9 @@ class TabVenta(QWidget):
             
         except Exception as e: 
             QMessageBox.critical(self, "Error SQL", str(e))
-# =======================================================
-# PESTAÑA 2: INVENTARIO (VERSIÓN RELACIONAL CORREGIDA)
-# =======================================================
+
+# PESTAÑA 2: INVENTARIO
+
 class TabInventario(QWidget):
     def __init__(self):
         super().__init__()
@@ -372,8 +371,6 @@ class TabInventario(QWidget):
             conn = pymysql.connect(**DB_CONFIG)
             cursor = conn.cursor()
             
-            # --- CONSULTA RELACIONAL SEGURA ---
-            # Usamos IFNULL(c.nombre, 'General') para que no falle si el producto no tiene categoría
             sql = """
                 SELECT p.sku, p.nombre, p.costo, p.precio, p.stock, IFNULL(c.nombre, 'General') 
                 FROM productos p 
@@ -406,10 +403,10 @@ class TabInventario(QWidget):
             self.tabla.blockSignals(False)
             
         except Exception as e:
-            print(f"❌ ERROR CARGANDO INVENTARIO: {e}") # ¡MIRA LA TERMINAL SI FALLA!
+            print(f"❌ ERROR CARGANDO INVENTARIO: {e}") 
             self.tabla.blockSignals(False)
 
-    # --- FUNCIONES DE GESTIÓN ---
+    
     def nuevo_producto(self):
         d = QDialog(self); l = QFormLayout(d); d.setWindowTitle("Nuevo Producto")
         sku, nom, cst, prc, cat = QLineEdit(), QLineEdit(), QLineEdit("0"), QLineEdit("0"), QLineEdit("General")
@@ -422,7 +419,7 @@ class TabInventario(QWidget):
         def guardar():
             try:
                 conn = pymysql.connect(**DB_CONFIG); c = conn.cursor()
-                # Lógica para buscar/crear categoría (repite la lógica del importador)
+         
                 c.execute("SELECT id FROM categorias WHERE nombre=%s", (cat.text(),))
                 res = c.fetchone()
                 if res: cat_id = res[0]
@@ -444,7 +441,7 @@ class TabInventario(QWidget):
         sku_orig = self.tabla.item(r, 0).text()
         
         d = QDialog(self); l = QFormLayout(d); d.setWindowTitle("Editar")
-        # Leemos valores actuales de la tabla para rellenar
+    
         nom = QLineEdit(self.tabla.item(r, 1).text())
         cst = QLineEdit(self.tabla.item(r, 2).text())
         prc = QLineEdit(self.tabla.item(r, 3).text())
@@ -494,9 +491,8 @@ class TabInventario(QWidget):
                 conn.commit(); conn.close(); self.cargar_datos()
             except Exception as e: QMessageBox.critical(self, "Error", str(e))
 
-# =======================================================
 # PESTAÑA 3: GASTOS
-# =======================================================
+
 class TabGastos(QWidget):
     def __init__(self): super().__init__(); self.initUI()
     def initUI(self):
@@ -529,9 +525,9 @@ class TabGastos(QWidget):
                 for j in range(4): self.t.setItem(i, j, QTableWidgetItem(str(r[j])))
         except: pass
 
-# =======================================================
-# PESTAÑA 4: CORTE (CORREGIDA SQL)
-# =======================================================
+
+# PESTAÑA 4: CORTE 
+
 class TabCorte(QWidget):
     def __init__(self, user): super().__init__(); self.user=user; self.msis=0; self.initUI()
     def initUI(self):
@@ -614,9 +610,9 @@ class TabCorte(QWidget):
             conn.commit(); conn.close()
             QMessageBox.information(self, "OK", "Guardado"); self.tdet.setRowCount(0); self.l_tot.setText("$0")
         except Exception as e: QMessageBox.critical(self, "Error", str(e))
-# =======================================================
-# PESTAÑA 5: REPORTES (CORREGIDA SQL)
-# =======================================================
+
+# PESTAÑA 5: REPORTES 
+
 class TabReportes(QWidget):
     def __init__(self): super().__init__(); self.initUI()
     def initUI(self):
@@ -636,7 +632,7 @@ class TabReportes(QWidget):
             conn = pymysql.connect(**DB_CONFIG); c = conn.cursor()
             sql = ""
             
-            # CORRECCIÓN AQUÍ: venta_id y producto_sku
+      
             if idx == 0: # Dia
                 sql = """SELECT HOUR(v.fecha), SUM(dv.subtotal-(IFNULL(p.costo,0)*dv.cantidad)) 
                          FROM ventas v 
@@ -671,9 +667,9 @@ class TabReportes(QWidget):
             self.lbl.setText(f"Margen Total: <b>${tot:,.0f}</b>")
             
         except Exception as e: QMessageBox.critical(self, "Error", str(e))              
-# =======================================================
+
 # MAIN
-# =======================================================
+
 class SistemaFinal(QMainWindow):
     def __init__(self, user):
         super().__init__()
@@ -702,4 +698,5 @@ if __name__ == '__main__':
             w = SistemaFinal(l.usuario_logueado)
             w.show(); app.exec_()
         else: break
+
     sys.exit()
